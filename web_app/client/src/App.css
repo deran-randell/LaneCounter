@@ -1,0 +1,31 @@
+.App {
+  font-family: sans-serif;
+  text-align: left;
+  display: flex;
+  flex-direction: row;
+}
+
+.content {
+  margin: 0.5em;
+  flex: 80%;
+}
+
+.side-column {
+  flex: 0 0 200px;
+  background-color: rgb(7, 24, 99);
+}
+
+.cad {
+  white-space: pre-wrap;
+  color: #fff;
+  text-align: center;
+  font-size: 20px;
+}
+
+body {
+  background-color: aliceblue;
+}
+
+.lane-detail-content {
+  flex: 80%;
+}
