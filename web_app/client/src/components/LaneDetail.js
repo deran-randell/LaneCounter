@@ -1,4 +1,4 @@
-import React, { useState }  from "react";
+import React, { useEffect, useState }  from "react";
 import { useParams } from "react-router-dom"
 import { useQuery } from "react-query";
 import axios from "axios";
@@ -10,42 +10,68 @@ import {
   Label,
   ResponsiveContainer,
 } from 'recharts';
+import styles from "./LaneDetail.module.css"
+import useInterval from "use-interval"
 
 export default function LaneDetail(props) {
 
   let params = useParams();
 
-  const [ data, setData ] = useState(null);
-  const [ timePeriod, setTimePeriod ] = useState("Last 24 hours");
+  // Period, number of minutes to view, refresh rate in seconds
+  let DetailTimePeriods = [
+    { label: "Today", value: 0, minutes: 0, update_rate: 60 },
+    { label: "Last 12 hours", value: 1, minutes: 12*60, update_rate: 60 },
+    { label: "Last 6 hours", value: 2, minutes: 6*60, update_rate: 60 },
+    { label: "Last 3 hours", value: 3, minutes: 3*60, update_rate: 60 },
+    { label: "Last 1 hour", value: 4, minutes: 60, update_rate: 60 },
+    { label: "Last 30 minutes", value: 5, minutes: 30, update_rate: 10 },
+    { label: "Last 10 minutes", value: 6, minutes: 10, update_rate: 10 },
+    { label: "Last 1 minute", value: 7, minutes: 1, update_rate: 1 }
+  ]
 
-  function handleTimePeriodChange(event){
-    setTimePeriod(event.target.value);
+  const [ data, setData ] = useState(null);
+  const [ timePeriodValue, setTimePeriodValue ] = useState(6);
+  const [ doDbLoad, setDoDbLoad ] = useState(true);
+  const [ updateCount, setUpdateCount ] = useState(0);
+
+  function handleTimePeriodChange(event) {
+    setTimePeriodValue(event.target.value);
   }
 
   const formatResponse = (res) => {
     return JSON.stringify(res, null, 2);
   };  
 
-  let fetch_query_name = `lane_detail_${params.id}` 
-  const { isLoading, error } =  useQuery (
-    fetch_query_name, 
+  let fetch_query_name = `lane_detail_${params.id}_${DetailTimePeriods[timePeriodValue].minutes}` 
+  useQuery (
+      fetch_query_name, 
       () => {
-        const url = `http://` + window.location.hostname + `:3001/laneDetail/${params.id}`;
+        const url = `http://` + window.location.hostname + `:3001/laneDetail/${params.id}/${DetailTimePeriods[timePeriodValue].minutes}`;
         axios.get(url
         ).then((res) => {
           setData(JSON.parse(formatResponse(res.data.data)));
+          setDoDbLoad(false);
         })
       }
   );
 
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
-  if (error) {
-    return <div>An error has occurred: {error.message}</div>
-  }  
-
+  useInterval(() => {
+      const url = `http://` + window.location.hostname + `:3001/laneDetailUpdate/${params.id}/${DetailTimePeriods[timePeriodValue].update_rate}`;
+      axios.get(url
+      ).then((res) => {
+        let temp = JSON.parse(formatResponse(res.data.data));
+        data.push(...temp);
+        let seconds = DetailTimePeriods[timePeriodValue].update_rate;
+        for (let j=0; j<seconds; j++) {
+          data.shift();
+        }
+        setData(data);
+        setUpdateCount(updateCount + 1);
+      });
+    },
+    doDbLoad ? null : (DetailTimePeriods[timePeriodValue].update_rate*1000)
+  );
+  
   const formatTimeTick = (value) => {
     let date = new Date(value*1000);
     let hours = date.getHours();
@@ -63,17 +89,28 @@ export default function LaneDetail(props) {
     return (hours + ":" + mins + ":" + secs);
   }
 
+  // TODO: Make it all look nice!
+
   return (
     <>
       <div className="lane-detail-content">
-        <h2>Lane {params.id}</h2>
         <div>
-          <select value={timePeriod} onChange={handleTimePeriodChange}>
-            <option>Last 24 hours</option>
-            <option>Last 12 hours</option>
-            <option>Last hour</option>
-          </select>
+          <h1 className={styles.laneDetailHeader1}>
+            Lane {params.id}
+          </h1>          
+          <h2 className={styles.laneDetailHeader2}>
+              Moth count per second
+              <span id={styles.laneDetailHeaderSpace}></span>
+              <select value={timePeriodValue} onChange={handleTimePeriodChange}>
+                {DetailTimePeriods.map((t) => <option key={t.label} value={t.value}>{t.label}</option>)}
+              </select>
+          </h2>
+          <p>Update count = {updateCount}</p>
+        </div>        
 
+        {!data && <div>Loading</div>}
+        {data && 
+          <div>
           {
             <LineChart
                 width={1000}
@@ -94,12 +131,13 @@ export default function LaneDetail(props) {
               <YAxis 
                 style={{fontSize: '14px',}}
                 dataKey="moth_delta"
-                label={{ value: 'Moth Delta', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}>
+                label={{ value: 'Moth Count', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}>
               </YAxis>
               <Line dataKey="moth_delta"/>
             </LineChart>
           }
-        </div>
+          </div>
+        }
       </div>
     </>
   );
