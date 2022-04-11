@@ -1,0 +1,18 @@
+
+.laneDetailHeader1 {
+    margin:0;
+    padding:0;
+    font-size: 24px;
+    color: rgb(7, 24, 99);
+}
+
+.laneDetailHeader2 {
+    margin-top: 12px;
+    margin-bottom: 0px;
+    font-size: 20px;
+    color: rgb(7, 24, 99);
+}
+
+#laneDetailHeaderSpace {
+    margin-right: 10px;
+}

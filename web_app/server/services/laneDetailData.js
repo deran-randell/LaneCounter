@@ -23,14 +23,24 @@ async function getLaneDataWithPagination(laneId, page = 1){
   }
 }
 
-async function getLaneData(laneId) {
+// Initial fetch from LaneDetail page - when opened or time period selection changes
+// Thereafter, getLaneUpdate
+async function getLaneData(laneId, minutes) {
   try {
+
+    let time_str = "";
+    if (minutes !== "0") {
+      time_str = "AND time_stamp > (NOW() - INTERVAL " + minutes + " MINUTE) ";
+    }     
+
     const rows = await db.query(
-      "SELECT UNIX_TIMESTAMP(time_stamp) AS unix_timestamp, moth_delta FROM lanecount WHERE lane_id = ? ORDER BY time_stamp ASC",
+      "SELECT UNIX_TIMESTAMP(time_stamp) AS unix_timestamp, moth_delta FROM lanecount " +
+      "WHERE lane_id = ? " + time_str +
+      "ORDER BY time_stamp ASC",
       [laneId]
     );
 
-    const data = helper.emptyOrRows(rows);
+    data = helper.emptyOrRows(rows);
 
     return {
       data

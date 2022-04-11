@@ -8,6 +8,7 @@ var cors = require("cors");
 const indexRouter = require('./routes/index');
 const configRouter = require('./routes/laneConfig');
 const laneDetailRouter = require('./routes/laneDetail');
+const laneDetailUpdateRouter = require('./routes/laneDetailUpdate');
 const dashboardRouter = require('./routes/dashboard');
 const laneOverviewRouter = require('./routes/laneOverview');
 
@@ -42,6 +43,7 @@ app.use('/', indexRouter);
 app.use('/dashboard', dashboardRouter);
 app.use('/config', configRouter);
 app.use('/laneDetail', laneDetailRouter);
+app.use('/laneDetailUpdate', laneDetailUpdateRouter);
 app.use('/laneOverview', laneOverviewRouter);
 
 app.use((err, req, res, next) => {

@@ -1,0 +1,14 @@
+const express = require('express');
+const router = express.Router();
+const laneUpdate = require('../services/laneDetailUpdateData');
+
+router.get('/:lane_id/:seconds', async function(req, res, next) {
+  try {
+    res.json(await laneUpdate.getLaneDetailUpdate(req.params.lane_id, req.params.seconds));
+  } catch (err) {
+    console.error("Error while getting lane data update ", err.message);
+    next(err);
+  }
+});
+
+module.exports = router;

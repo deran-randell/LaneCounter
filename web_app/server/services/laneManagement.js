@@ -1,3 +1,4 @@
+const CircularBuffer = require('circular-buffer');
 const db = require('./db');
 const laneData = require('./laneDetailData');
 const { MothLane } = require('./mothLaneClass');
@@ -30,10 +31,9 @@ async function initialiseMothCounter() {
             let result2 = await getCurrentLaneDevice(i+1);
             if (Boolean(result2.device)) {
                 mothLanes[i].device = result2.device;
-                //console.log("Device for lane " + (i+1) + " " + mothLanes[i].device);
             }
             else {
-                //console.log("Device for lane " + (i+1) + " not found");
+                console.log("Device for lane " + (i+1) + " not found");
             }
 
             await getLastLaneData(i+1);
@@ -44,9 +44,22 @@ async function initialiseMothCounter() {
                 ", millis=" + mothLanes[i].millis +
                 ", timestamp=" + mothLanes[i].timestamp
             );    
+
+            mothLanes[i].add_history();
         } 
             
         initialised = true;
+
+        /*
+        let temp = new CircularBuffer(10);
+        for (let j = 0; j < 20; j++) {
+            temp.enq(j);
+            console.log("temp size = " + temp.size() + " array = " + temp.toarray());
+        }
+        console.log("temp index 0 = " + temp.get(0));
+        console.log("temp index 9 = " + temp.get(9));
+        console.log("temp get 0 to 5 = " + temp.get(0,5));
+        */
     }
 }
 
@@ -154,23 +167,26 @@ function updateDataForLane(lane_id, lane_data) {
 
                 if (do_same_device_restart_check) {
                     // Now decide whether the device was restarted since the last update, or a millis rollover happened
-                    let reset_rollover = mothLanes[i].did_reset(lane_data.timestamp, previous_timestamp);
+                    let reset_rollover = mothLanes[i].did_reset(lane_data.timestamp, previous_timestamp, lane_data.moth_count);
 
-                    if (reset_rollover.rollover) { // We can continue to use the current count
-                        addCountForLane(lane_id, lane_data.moth_count, lane_data.moth_count-mothLanes[i].count, lane_data.timestamp); // updates total, count, delta, etc
-                    }                        
-                    else if (reset_rollover.reset) { // Device reset, so count will have started from zero again
+                    // Ignore minor negative moth counts... updat to prevent MySQL error as column is unsigned INT
+                    if (reset_rollover.ignore_count) {
+                        lane_data.moth_count = mothLanes[i].count;
+                    }
+
+                    if (reset_rollover.reset) { // Device reset, so count and millis will have started from zero again
                         if (add_device) {
                             addLaneDevice(lane_id, lane_data.device_id); // updates mothLanes[i].device
                         }
                         addCountForLane(lane_id, lane_data.moth_count, lane_data.moth_count, lane_data.timestamp); // updates total, count, delta, etc
                     }
-                    else {
-                        // TODO: Ignore decrease in count for now - let's see how much of a problem this is first
-                        console.log("Lane" + lane_id + " normal count update");
-                        addCountForLane(lane_id, lane_data.moth_count, lane_data.moth_count-mothLanes[i].count, lane_data.timestamp); // updates total, count, delta, etc
+                    else if (reset_rollover.count_rollover) { // Doesn't matter if millis did rollover
+                        addCountForLane(lane_id, lane_data.moth_count, lane_data.moth_count, lane_data.timestamp);
                     }
-                    
+                    else {
+                        // Normal update, even if millis did rollover
+                        addCountForLane(lane_id, lane_data.moth_count, lane_data.moth_count-mothLanes[i].count, lane_data.timestamp); // updates total, count, delta, etc
+                    }                    
                 }
             }
 
@@ -192,8 +208,10 @@ function addCountForLane(lane_id, count, delta, millis) {
         mothLanes[i].count = count;
         mothLanes[i].millis = millis;
         
-        let time_stamp = mothLanes[i].timestamp/1000;
+        mothLanes[i].add_history();
+
         // The LaneCount table has a trigger to update the LaneTotal table after insert
+        let time_stamp = mothLanes[i].timestamp/1000;
         laneData.addLaneData(lane_id, count, delta, millis, time_stamp);
     } 
     catch (error) {

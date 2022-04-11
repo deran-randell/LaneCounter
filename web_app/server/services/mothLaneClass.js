@@ -1,3 +1,5 @@
+const CircularBuffer = require("circular-buffer");
+
 class MothLane {
     constructor(lane_id, timestamp) {
         this._id = lane_id;
@@ -8,11 +10,19 @@ class MothLane {
         this._millis = 0;
         this._timestamp = timestamp; // a number in milliseconds
         this._active = false;
+
+        // Format the array objects in the same way as the getLaneData MySQL query result: {unix_timestamp, moth_delta}
+        // Keep most recent 80 seconds of data per lane
+        this._history = new CircularBuffer(80); 
     }
 
-    // Did the device reset?
-    did_reset(new_millis, previous_timestamp) {
-        let result = {"reset": false, "rollover": false};
+    add_history() { // Take the current values and write them to the history array        
+        this._history.enq({"unix_timestamp": Math.round(this._timestamp/1000), "moth_delta": this._delta });
+    }
+
+    // Did the device reset? Did the millis or count rollover?
+    did_reset(new_millis, previous_timestamp, new_count) {
+        let result = {"reset": false, "millis_rollover": false, "count_rollover": false, "ignore_count": false};
 
         let diff_millis = new_millis - this._millis;
         //console.log("diff_millis = " + diff_millis);
@@ -24,7 +34,7 @@ class MothLane {
             // If the system has been down without logging for this long we have bigger data issues anyway!
             if (Math.abs(diff_millis) >= 4233600000) {
                 console.log("Lane " + this._id + " millis rollover detected");
-                result.rollover = true;
+                result.millis_rollover = true;
             }
             else {
                 console.log("Lane " + this._id + " reset detected - millis decreased");
@@ -42,6 +52,23 @@ class MothLane {
             if (diff_data > 2000) {
                 console.log("Lane " + this._id + " reset detected - time and millis difference more than 2 seconds");
                 result.reset = true;
+            }
+        }
+
+        if (result.reset) {
+            result.count_rollover = true;
+        }
+        else {
+            let count_diff = new_count - this._count;
+            if (count_diff < 0) { // This could just be a glitch? 
+                // Look for an integer rollover
+                if (count_diff < -4000000000) {
+                    result.count_rollover = true;
+                }
+                else {
+                    // pretend like it didn't happen
+                    result.ignore_count = true;
+                }
             }
         }
 
@@ -112,6 +139,14 @@ class MothLane {
 
     set active(lane_active) {
         this._active = lane_active;
+    }
+
+    get history() {
+        return this._history;
+    }
+
+    set history(lane_history) {
+        this._history = lane_history;
     }
 }
 
