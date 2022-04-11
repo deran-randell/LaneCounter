@@ -32,7 +32,7 @@ void LaneCounterServer::handleRead(const std::vector<uint8_t>& message, boost::s
 {
 	boost::system::error_code error;
 
-	lane_counter_messages::Header header;
+	lane_counter_messages::Header header = {};
 
 	memcpy(&header, message.data(), message.size());
 
