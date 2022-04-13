@@ -9,8 +9,10 @@ const indexRouter = require('./routes/index');
 const configRouter = require('./routes/laneConfig');
 const laneDetailRouter = require('./routes/laneDetail');
 const laneDetailUpdateRouter = require('./routes/laneDetailUpdate');
+const laneDetailHistoryRouter = require('./routes/laneHistory');
 const dashboardRouter = require('./routes/dashboard');
 const laneOverviewRouter = require('./routes/laneOverview');
+const laneDeviceRouter = require('./routes/laneDevice');
 
 const mqttClient = require('./services/mqttClient');
 
@@ -44,7 +46,9 @@ app.use('/dashboard', dashboardRouter);
 app.use('/config', configRouter);
 app.use('/laneDetail', laneDetailRouter);
 app.use('/laneDetailUpdate', laneDetailUpdateRouter);
+app.use('/laneDetailHistory', laneDetailHistoryRouter);
 app.use('/laneOverview', laneOverviewRouter);
+app.use('/laneDevice', laneDeviceRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
