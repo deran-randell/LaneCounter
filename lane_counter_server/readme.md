@@ -14,7 +14,7 @@ MQTT Broker Address - IP address of mosquitto or other MQTT message brokers
 
 >`MQTT_BROKER_ADDRESS = 127.0.0.1`
 
-MQTT Broker Address - IP address of mosquitto or other MQTT message brokers usually 1883
+MQTT Broker Port - TCP Port for mosquitto or other MQTT message brokers usually, 1883
 
 >`MQTT_BROKER_PORT = 1883`
 
@@ -32,3 +32,5 @@ TCP server port that the moth counter devices should connect to
 - libssl-1_1-x64.dll
 - mosquittopp.dll
 - mosquitto_dynamic_security.dll
+
+> Note: The DLLs must be in the same folder as the lane\_counter\_server.exe file.
