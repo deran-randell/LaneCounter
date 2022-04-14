@@ -11,6 +11,7 @@ The application is run as:
 ## **Config File** - config.ini
 
 MQTT Broker Address - IP address of mosquitto or other MQTT message brokers
+> [SETTINGS]
 
 >`MQTT_BROKER_ADDRESS = 127.0.0.1`
 
