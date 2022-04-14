@@ -10,11 +10,12 @@ export default function LaneOverview(props) {
 
   let lane_url = "/laneDetail/" + props.id;
 
-  const [ data, setData ] = useState(null);  // device, last_update, total, last_delta
+  const [ data, setData ] = useState(null);  // device, last_update, total, last_delta, connected
   const [ graphData, setGraphData ] = useState([]);
   const [ barData, setBarData ] = useState([]);
 
   const newData = (new_data) => {
+
     if (graphData.length >= 20) {
       graphData.shift();
     }
@@ -22,6 +23,13 @@ export default function LaneOverview(props) {
 
     setGraphData(graphData);
     setBarData(graphData.map(function(v,i) { return {index: i, delta: v}}));
+
+    // Change the colour of the overview depending on connection status
+    // Need to notify parent component to change styling
+    if ( (!data) || (new_data.connected !== data.connected) ) {
+      props.updateConnection(props.id-1, new_data.connected);
+    }
+
     setData(new_data);  
   };
 

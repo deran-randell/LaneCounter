@@ -13,7 +13,19 @@ class MothLane {
 
         // Format the array objects in the same way as the getLaneData MySQL query result: {unix_timestamp, moth_delta}
         // Keep most recent 80 seconds of data per lane
-        this._history = new CircularBuffer(80); 
+        this._history = new CircularBuffer(80);
+        
+        // CircularBuffer: 
+        // .get(0) = newest
+        // .get(.size) = oldest
+        // .toarray() [newest...oldest]
+        // .get(0,2) [0,1,2] inclusive
+    }
+
+    is_receiving_data() {
+        // TODO: tolerance?
+        let now = new Date();
+        return ((this._timestamp - now.getTime()) < 3);
     }
 
     add_history() { // Take the current values and write them to the history array        

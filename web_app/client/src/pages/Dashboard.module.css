@@ -1,5 +1,17 @@
-.laneDetail {
+.laneDetailConnected {
     border-style: solid;
+    background-color: white;
+    min-width: 200px;
+    max-width: 200px;
+    min-height: 260px;
+    max-height: 260px;
+    margin: 10px;
+    padding: 0px 10px 0px 10px;
+}
+
+.laneDetailNotConnected {
+    border-style: solid;
+    background-color: lightgrey;
     min-width: 200px;
     max-width: 200px;
     min-height: 260px;
