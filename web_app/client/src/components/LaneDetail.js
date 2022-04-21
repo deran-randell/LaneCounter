@@ -371,7 +371,7 @@ export default function LaneDetail(props) {
 
   return (
     <>
-      <div>
+      <div >
         <div>
           <h1 className={styles.laneDetailHeader1}>
             Lane {params.id}
@@ -389,7 +389,7 @@ export default function LaneDetail(props) {
         </button>
         {!data && <div>Loading</div>}
         {data && 
-          <div>
+          <div className={styles.noSelect}>
           {
             <ResponsiveContainer width="100%" aspect={3.0}>
               <LineChart
@@ -454,7 +454,7 @@ export default function LaneDetail(props) {
         </button>
         {!historyData && <div>Loading</div>}
         {historyData && 
-          <div>
+          <div className={styles.noSelect}>
           {
             <ResponsiveContainer width="100%" aspect={3.0}>
               <LineChart
