@@ -16,3 +16,16 @@
 #laneDetailHeaderSpace {
     margin-right: 10px;
 }
+
+.customTooltip {
+    background-color: white;
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightgrey;
+    font-size: 12px;
+}
+
+.tooltipLabel {
+    margin: 0;
+    padding: 2px;
+}
