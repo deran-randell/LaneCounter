@@ -28,19 +28,64 @@ async function getLaneDataWithPagination(laneId, page = 1){
 async function getLaneData(laneId, minutes) {
   try {
 
+    let sql_string = "";
+    let aggregate_seconds = 0;
+
+    switch (minutes) {
+      case "0":
+        aggregate_seconds = 60;
+        break;
+      case "1":
+        break;
+      case "10":
+        break;
+      case "30":
+        aggregate_seconds = 2;
+        break;
+      case "60":
+        aggregate_seconds = 4;
+        break;
+      case "180":
+        aggregate_seconds = 10;
+        break;
+      case "360":
+        aggregate_seconds = 30;
+        break;
+      case "720":
+        aggregate_seconds = 30;
+        break;
+    }
+
     let time_str = "";
     if (minutes !== "0") {
       time_str = "AND time_stamp > (NOW() - INTERVAL " + minutes + " MINUTE) ";
-    }     
+    }
 
-    const rows = await db.query(
-      "SELECT UNIX_TIMESTAMP(time_stamp) AS unix_timestamp, moth_delta FROM lanecount " +
-      "WHERE lane_id = ? " + time_str +
-      "ORDER BY time_stamp ASC",
-      [laneId]
-    );
+    if (aggregate_seconds !== 0)
+    {
+      sql_string = 
+        "SELECT UNIX_TIMESTAMP(time_stamp) AS unix_timestamp,	moth_delta FROM (" +
+          "SELECT" + 
+            "(MAX(time_stamp) + INTERVAL 1 second) AS time_stamp, " + 
+            "SUM(moth_delta) AS moth_delta, " + 
+            "FLOOR(UNIX_TIMESTAMP(time_stamp)/(" + aggregate_seconds + ")) AS timekey " +  
+          "FROM LaneCount " + 
+          "WHERE lane_id = ? " + time_str +
+          "GROUP BY lane_id, timekey) AS temp " +
+          "ORDER BY time_stamp ASC";       
+        }
+    else {      
+      sql_string = 
+        "SELECT UNIX_TIMESTAMP(time_stamp) AS unix_timestamp, moth_delta FROM lanecount " +
+        "WHERE lane_id = ? " + time_str +
+        "ORDER BY time_stamp ASC";       
+    }
+
+    const rows = await db.query(sql_string, [laneId]);
 
     data = helper.emptyOrRows(rows);
+
+    console.log(data.length);
 
     return {
       data

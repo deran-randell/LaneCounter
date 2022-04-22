@@ -10,7 +10,6 @@ export default function Config() {
         try {
             const url = `http://` + window.location.hostname + `:3001/config`;
             axios.get(url).then((res) => {
-              console.log(res.data);
               setConfig(res.data);
             })
           }            

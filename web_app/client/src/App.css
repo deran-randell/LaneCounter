@@ -9,7 +9,8 @@
   margin-top: 0.5em;
   margin-left: 1.0em;
   margin-right: 1.0em;
-  flex: 80%;
+  min-width: 0; 
+  flex: 100%;
 }
 
 .side-column {
@@ -26,8 +27,4 @@
 
 body {
   background-color: aliceblue;
-}
-
-.lane-detail-content {
-  flex: 80%;
 }

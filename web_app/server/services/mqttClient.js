@@ -41,7 +41,7 @@ mqtt_client.on('message', (topic, message) => {
 
 function handleLaneData (lane_id, message) {
   const data = JSON.parse(message);
-  console.log("New Data for Lane " + lane_id + ": " + data.device_id + ", " + data.moth_count + ", " + data.timestamp);
+  //console.log("New Data for Lane " + lane_id + ": " + data.device_id + ", " + data.moth_count + ", " + data.timestamp);
   laneManagement.updateDataForLane(lane_id, data)
 }
 
