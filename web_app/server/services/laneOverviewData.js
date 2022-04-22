@@ -1,17 +1,7 @@
 const laneManagement = require('./laneManagement');
 
-/*
-function between(min, max) {  
-  return Math.floor(
-    Math.random() * (max - min) + min
-  )
-}
-*/
-
 function getLaneOverviewData(laneId) {
   try {
-    
-    //const delta = between(1,100);
 
     let data = {
         "total": laneManagement.mothLanes[laneId-1].total, 

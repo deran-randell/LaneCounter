@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { BiDetail } from 'react-icons/bi';
 import axios from "axios"
@@ -65,7 +65,8 @@ export default function LaneOverview(props) {
       <hr />
 
       {!data && <div>Loading</div>}
-      {data && 
+      {data && !data.connected && <div>No data</div>}
+      {data && data.connected &&
         <div>
             <table>
             <tbody>
@@ -90,13 +91,14 @@ export default function LaneOverview(props) {
         </div>
       }
 
-      <ResponsiveContainer width="100%" height="30%">
-        <LineChart data={barData} margin={{ top: 5, right: 1, bottom: 2, left: 1 }}>
-          <XAxis dataKey="index" hide="true" />
-          <Line type="monotone"  isAnimationActive={false} dataKey="delta" fill="#092788"/>
-        </LineChart>
-      </ResponsiveContainer>
-
+      { barData && data && data.connected &&
+          <ResponsiveContainer width="100%" height="30%">
+            <LineChart data={barData} margin={{ top: 5, right: 1, bottom: 2, left: 1 }}>
+              <XAxis dataKey="index" hide="true" />
+              <Line type="monotone"  isAnimationActive={false} dataKey="delta" fill="#092788"/>
+            </LineChart>
+          </ResponsiveContainer>
+      }
     </>
   );
 }

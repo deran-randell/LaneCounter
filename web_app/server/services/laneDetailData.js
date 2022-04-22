@@ -85,8 +85,6 @@ async function getLaneData(laneId, minutes) {
 
     data = helper.emptyOrRows(rows);
 
-    console.log(data.length);
-
     return {
       data
     }
