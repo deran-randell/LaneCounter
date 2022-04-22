@@ -25,7 +25,7 @@ class MothLane {
     is_receiving_data() {
         // TODO: tolerance?
         let now = new Date();
-        return ((this._timestamp - now.getTime()) < 3);
+        return ((now.getTime() - this._timestamp) < 3000);
     }
 
     add_history() { // Take the current values and write them to the history array        
