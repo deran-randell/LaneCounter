@@ -15,47 +15,55 @@ LaneCounterServer::~LaneCounterServer()
 	server_.close();
 }
 
-void LaneCounterServer::handleConnected(boost::shared_ptr<tcp::socket> socket) 
+void LaneCounterServer::handleConnected(boost::shared_ptr<tcp::socket> socket)
 {
 	std::cout << "Lane Counter Client Connected \n";
 }
 
-void LaneCounterServer::handleDisconnected(boost::shared_ptr<tcp::socket> socket) 
+void LaneCounterServer::handleDisconnected(boost::shared_ptr<tcp::socket> socket)
 {}
 
-size_t LaneCounterServer::getReadSize() 
+size_t LaneCounterServer::getReadSize()
 {
 	return sizeof(lane_counter_messages::Header);
 }
 
-void LaneCounterServer::handleRead(const std::vector<uint8_t>& message, boost::shared_ptr<Socket> socket, Endpoint remote_endpoint) 
+void LaneCounterServer::handleRead(const std::vector<uint8_t>& message, boost::shared_ptr<Socket> socket, Endpoint remote_endpoint)
 {
-	boost::system::error_code error;
+	try
+	{
+		boost::system::error_code error;
 
-	lane_counter_messages::Header header = {};
+		lane_counter_messages::Header header = {};
 
-	memcpy(&header, message.data(), message.size());
+		memcpy(&header, message.data(), message.size());
 
-	if (header.message_size != 0) {
-		if (error) {
-			printf("Error \n");
-			return;
+		if (header.message_size != 0) {
+			if (error) {
+				printf("Error \n");
+				return;
+			}
 		}
+
+		switch (header.type)
+		{
+		case lane_counter_messages::message_type::counter_info:
+		{
+			lane_counter_messages::CounterInfo counter;
+			boost::asio::read(*socket, boost::asio::buffer(&counter, header.message_size), error);
+
+			if (tcp_handler_)
+				tcp_handler_->handleTcpMessage(counter);
+
+			break;
+		}
+		default:
+			break;
+		}
+
 	}
-
-	switch (header.type)
+	catch (const std::exception& e)
 	{
-	case lane_counter_messages::message_type::counter_info:
-	{
-		lane_counter_messages::CounterInfo counter;
-		boost::asio::read(*socket, boost::asio::buffer(&counter, header.message_size), error);
-
-		if (tcp_handler_)
-			tcp_handler_->handleTcpMessage(counter);
-
-		break;
-	}
-	default:
-		break;
+		std::cout << e.what() << std::endl;
 	}
 }

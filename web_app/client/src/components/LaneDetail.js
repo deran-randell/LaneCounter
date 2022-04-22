@@ -11,6 +11,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  CartesianGrid,
+  ReferenceArea,
 } from 'recharts';
 import styles from "./LaneDetail.module.css"
 import useInterval from "use-interval"
@@ -55,6 +57,23 @@ export default function LaneDetail(props) {
 
   // useRef instead of useState to avoid updating state in render
   const activeDotPayload = useRef(null);
+  
+  const [leftArea, setLeftArea] = useState(null);
+  const [rightArea, setRightArea] = useState(null);
+  const [bottom, setBottom] = useState(null);
+  const [top, setTop] = useState(null);
+  const [left, setLeft] = useState(null);
+  const [right, setRight] = useState(null);
+
+
+  const [leftHistoryArea, setLeftHistoryArea] = useState(null);
+  const [rightHistoryArea, setRightHistoryArea] = useState(null);
+
+  const [leftHistory, setLeftHistory] = useState(null);
+  const [rightHistory, setRightHistory] = useState(null);
+
+
+
 
   function handleTimePeriodChange(event) {
     setTimePeriodValue(event.target.value);
@@ -181,6 +200,141 @@ export default function LaneDetail(props) {
     }
     return (day + "/" + month + " " + hours + ":" + mins + ":" + secs);
   }
+  //  console.log("Data --- > ", data);
+  // Zoom
+  const getAxisYDomain = (from, to, ref, offset) => {
+    // console.log("data --->", data);
+    const from_ = data.map(object => object.unix_timestamp).indexOf(from);
+    const to_ = data.map(object => object.unix_timestamp).indexOf(to);
+    //console.log(from_, "  ", to_);
+
+    const refData = data.slice(from_, to_);
+    //console.log("ref data ---> ",refData)
+    let [bottom_, top_] = [refData[0][ref], refData[0][ref]];
+    refData.forEach((d) => {
+      if (d[ref] > top_) top_ = d[ref];
+      if (d[ref] < bottom_) bottom_ = d[ref];
+    });
+  
+    return [(bottom_ | 0) - offset, (top_ | 0) + offset];
+  };
+  
+  const set_left_area = (left_area) =>
+  {
+    setLeftArea(left_area);
+    //console.log(left_area);
+  }
+
+  const set_right_area = (right_area) =>
+  {
+    setRightArea(right_area);
+    //console.log(right_area);
+  }
+
+  const set_left_history_area = (left_area) =>
+  {
+    setLeftHistoryArea(left_area);
+    //console.log(left_area);
+  }
+
+  const set_right_history_area = (right_area) =>
+  {
+    setRightHistoryArea(right_area);
+    //console.log(right_area);
+  }
+
+  const zoom = ()=>
+  {
+    let data_ = [...data];
+    //console.log("zoom ------- ")
+    if (leftArea === rightArea || rightArea === '') {
+      setLeftArea('');
+      setRightArea('');
+      return;
+    }
+
+        // xAxis domain
+        if (leftArea > rightArea)
+        {
+          setRightArea(leftArea);
+          setLeftArea(rightArea);
+        } 
+
+        // yAxis domain
+        const [bottom_, top_] = getAxisYDomain(leftArea, rightArea, 'unix_timestamp', 1);
+        
+        setRightArea('');
+        setLeftArea('');
+        setLeft(leftArea);
+        setRight(rightArea);
+        setBottom(bottom_);
+        setTop(top_);
+        setData(data_.slice());
+
+
+        //console.log("bottom", bottom_);
+        //console.log("top ",top_);
+
+  }
+
+  const zoomOut = () =>
+  {
+    setRightArea('');
+    setLeftArea('');
+    setLeft('dataMin');
+    setRight('dataMax');
+    setBottom('dataMin');
+    setTop('dataMax+30');
+    setData(data);
+  }
+
+
+
+  const zoomHistory = ()=>
+  {
+    let data_ = [...historyData];
+
+    //console.log("zoom history ------- ")
+    if (leftHistoryArea === rightHistoryArea || rightHistoryArea === '') {
+      setLeftHistoryArea('');
+      setRightHistoryArea('');
+      return;
+    }
+
+        // xAxis domain
+        if (leftHistoryArea > rightHistoryArea)
+        {
+          setRightArea(leftHistoryArea);
+          setLeftArea(rightHistoryArea);
+        } 
+
+        // yAxis domain
+        // const [bottom_, top_] = getAxisYDomain(leftHistoryArea, rightHistoryArea, 'unix_timestamp', 1);
+        
+        setRightHistoryArea('');
+        setLeftHistoryArea('');
+        setLeftHistory(leftHistoryArea);
+        setRightArea(rightHistoryArea);
+        // setBottom(bottom_);
+        // setTop(top_);
+        setHistoryData(historyData.slice());
+
+
+        // console.log("bottom", bottom_);
+        // console.log("top ",top_);
+
+  }
+
+  const zoomOutHistory = () =>
+  {
+    setRightHistoryArea('');
+    setLeftHistoryArea('');
+    setLeftHistory('dataMin');
+    setRightHistory('dataMax+10');
+    // setBottom('dataMin');
+    // setTop('dataMax+30');
+    setHistoryData(historyData);
+  }
 
   // TODO: Make it all look nice!
  
@@ -205,7 +359,7 @@ export default function LaneDetail(props) {
         <circle cx={dotData.cx} cy={dotData.cy} r={dotData.r} stroke={dotData.stroke} strokeWidth={dotData.strokeWidth} fill={dotData.fill} />
     );
   }
-
+ 
   const CustomHistoryTooltip = ({ active, payload, label }) => {
     if (active && payload && payload[0]) {
       return (
@@ -233,24 +387,34 @@ export default function LaneDetail(props) {
               </select>
           </h2>
         </div>        
-
+        <button type="button" className="btn update" onClick={zoomOut}>
+          Zoom Out
+        </button>
         {!data && <div>Loading</div>}
-        {data &&
-          <div>
+        {data && 
+          <div className={styles.noSelect}>
           {
             <ResponsiveContainer width="100%" aspect={3.0}>
               <LineChart
                   width={1000}
                   height={400}
                   data={data}
-                  margin={{ top: 30, right: 30, left: 30, bottom: 30 }}>
+                  margin={{ top: 30, right: 30, left: 30, bottom: 30 }}
+                  onMouseDown={(e) => set_left_area(e.activeLabel)}
+                  onMouseMove={(e) => set_right_area(e.activeLabel)} 
+                  onMouseUp={zoom}
+                   >
+                  
+                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
+                   padding={{ left: 10 }}
+                  allowDataOverflow = {true}
                   style={{fontSize: '14px',}}
                   xAxisId={0} 
                   type="number" 
                   scale="time" 
                   dataKey="unix_timestamp"
-                  domain={["auto", "auto"]}
+                  domain={[left, right]}
                   tick={{angle: -35, textAnchor: "end"}}
                   tickFormatter={formatTimeTick}>
                   <Label value="Time" offset={40} position="bottom"/>
@@ -271,11 +435,14 @@ export default function LaneDetail(props) {
                       return (<ReferenceLine key={item.unix_timestamp} x={item.unix_timestamp} stroke="red" />)
                     })                
                 }                            
-                <Line 
-                  isAnimationActive={false}
-                  dataKey="moth_delta" 
-                  activeDot={activeDotHandler} 
+                <Line  
+                  dataKey="moth_delta"
+                  animationDuration={300}
+                  activeDot={activeDotHandler}
                   dot={DetailTimePeriods[timePeriodValue].value === 7 ? true : false}/>
+                {leftArea && rightArea ? (
+               <ReferenceArea  x1={leftArea} x2={rightArea} strokeOpacity={0.3} />
+                    ) : null}
               </LineChart>
             </ResponsiveContainer>             
           }
@@ -289,24 +456,31 @@ export default function LaneDetail(props) {
               {HistoryTimePeriods.map((t) => <option key={t.label} value={t.value}>{t.label}</option>)}
             </select>
         </h2>
-
+        <button type="button" className="btn update history" onClick={zoomOutHistory}>
+          Zoom Out
+        </button>
         {!historyData && <div>Loading</div>}
         {historyData && 
-          <div>
+          <div className={styles.noSelect}>
           {
             <ResponsiveContainer width="100%" aspect={3.0}>
               <LineChart
                   width={1000}
                   height={400}
                   data={historyData}
-                  margin={{ top: 30, right: 30, left: 30, bottom: 30 }}>
-                <XAxis 
+                  margin={{ top: 30, right: 30, left: 30, bottom: 30 }}
+                  onMouseDown={(e) => set_left_history_area(e.activeLabel)}
+                  onMouseMove={(e) => set_right_history_area(e.activeLabel)} 
+                  onMouseUp={zoomHistory}
+                  >
+                <XAxis
+                  allowDataOverflow = {true} 
                   style={{fontSize: '12px',}}
                   xAxisId={0} 
                   type="number" 
                   scale="time" 
                   dataKey="unix_timestamp"
-                  domain={["auto", "auto"]}
+                  domain={[leftHistory, rightHistory]}
                   tick={{angle: -35, textAnchor: "end"}}
                   tickFormatter={formatDayTick}>
                   <Label value="Time" offset={40} position="bottom"/>
@@ -314,7 +488,10 @@ export default function LaneDetail(props) {
                 <YAxis 
                   style={{fontSize: '14px',}}
                   dataKey="moth_delta"
-                  label={{ value: 'Moth Count', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}>
+                  label={{ value: 'Moth Count', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}
+                  domain={["dataMin", "dataMax+20"]}
+                  >
+                    
                 </YAxis>
                 <Tooltip 
                   isAnimationActive={false}
@@ -325,7 +502,10 @@ export default function LaneDetail(props) {
                       return (<ReferenceLine key={item.unix_timestamp} x={item.unix_timestamp} stroke="red" />)
                     })                
                 }                            
-                <Line dataKey="moth_delta" dot={false}/>
+                <Line  animationDuration={300} dataKey="moth_delta" dot={false} />
+                {leftHistoryArea && rightHistoryArea ? (
+               <ReferenceArea  x1={leftHistoryArea} x2={rightHistoryArea} strokeOpacity={0.3} />
+                    ) : null}
               </LineChart>
           </ResponsiveContainer>
           }
