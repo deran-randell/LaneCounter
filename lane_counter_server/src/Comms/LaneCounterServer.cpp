@@ -3,6 +3,7 @@
 
 LaneCounterServer::LaneCounterServer(boost::asio::io_context& context, uint16_t port)
 	:server_{ context,port,*this }
+	, tcp_handler_{nullptr}
 {}
 
 void LaneCounterServer::setTcpHandler(TcpMsgHandlerInterface& tcp_handler)

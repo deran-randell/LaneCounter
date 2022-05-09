@@ -11,7 +11,7 @@
 class LaneCounterServer : public cybicomms::TcpClientHandler
 {
 	cybicomms::TcpServer server_;
-	TcpMsgHandlerInterface* tcp_handler_ = nullptr;
+	TcpMsgHandlerInterface* tcp_handler_ ;
 
 public:
 	LaneCounterServer(boost::asio::io_context& context, uint16_t port);

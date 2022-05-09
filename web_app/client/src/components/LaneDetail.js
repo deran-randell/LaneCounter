@@ -60,8 +60,8 @@ export default function LaneDetail(props) {
   
   const [leftArea, setLeftArea] = useState(null);
   const [rightArea, setRightArea] = useState(null);
-  const [bottom, setBottom] = useState(null);
-  const [top, setTop] = useState(null);
+  // const [bottom, setBottom] = useState(null);
+  // const [top, setTop] = useState(null);
   const [left, setLeft] = useState(null);
   const [right, setRight] = useState(null);
 
@@ -201,23 +201,23 @@ export default function LaneDetail(props) {
     return (day + "/" + month + " " + hours + ":" + mins + ":" + secs);
   }
   //  console.log("Data --- > ", data);
-  // Zoom
-  const getAxisYDomain = (from, to, ref, offset) => {
-    // console.log("data --->", data);
-    const from_ = data.map(object => object.unix_timestamp).indexOf(from);
-    const to_ = data.map(object => object.unix_timestamp).indexOf(to);
-    //console.log(from_, "  ", to_);
+  // // Zoom
+  // const getAxisYDomain = (from, to, ref, offset) => {
+  //   // console.log("data --->", data);
+  //   const from_ = data.map(object => object.unix_timestamp).indexOf(from);
+  //   const to_ = data.map(object => object.unix_timestamp).indexOf(to);
+  //   //console.log(from_, "  ", to_);
 
-    const refData = data.slice(from_, to_);
-    //console.log("ref data ---> ",refData)
-    let [bottom_, top_] = [refData[0][ref], refData[0][ref]];
-    refData.forEach((d) => {
-      if (d[ref] > top_) top_ = d[ref];
-      if (d[ref] < bottom_) bottom_ = d[ref];
-    });
+  //   const refData = data.slice(from_, to_);
+  //   //console.log("ref data ---> ",refData)
+  //   let [bottom_, top_] = [refData[0][ref], refData[0][ref]];
+  //   refData.forEach((d) => {
+  //     if (d[ref] > top_) top_ = d[ref];
+  //     if (d[ref] < bottom_) bottom_ = d[ref];
+  //   });
   
-    return [(bottom_ | 0) - offset, (top_ | 0) + offset];
-  };
+  //   return [(bottom_ | 0) - offset, (top_ | 0) + offset];
+  // };
   
   const set_left_area = (left_area) =>
   {
@@ -261,14 +261,14 @@ export default function LaneDetail(props) {
         } 
 
         // yAxis domain
-        const [bottom_, top_] = getAxisYDomain(leftArea, rightArea, 'unix_timestamp', 1);
+        // const [bottom_, top_] = getAxisYDomain(leftArea, rightArea, 'unix_timestamp', 1);
         
         setRightArea('');
         setLeftArea('');
         setLeft(leftArea);
         setRight(rightArea);
-        setBottom(bottom_);
-        setTop(top_);
+        // setBottom(bottom_);
+        // setTop(top_);
         setData(data_.slice());
 
 
@@ -283,8 +283,8 @@ export default function LaneDetail(props) {
     setLeftArea('');
     setLeft('dataMin');
     setRight('dataMax');
-    setBottom('dataMin');
-    setTop('dataMax+30');
+    // setBottom('dataMin');
+    // setTop('dataMax+30');
     setData(data);
   }
 
@@ -317,7 +317,7 @@ export default function LaneDetail(props) {
         setRightArea(rightHistoryArea);
         // setBottom(bottom_);
         // setTop(top_);
-        setHistoryData(historyData.slice());
+        setHistoryData(data_.slice());
 
 
         // console.log("bottom", bottom_);
@@ -382,18 +382,24 @@ export default function LaneDetail(props) {
           <h2 className={styles.laneDetailHeader2}>
               Moth count {DetailTimePeriods[timePeriodValue].aggregation}
               <span id={styles.laneDetailHeaderSpace}></span>
-              <select value={timePeriodValue} onChange={handleTimePeriodChange}>
+              <select className={styles.dropdown} value={timePeriodValue} onChange={handleTimePeriodChange}>
                 {DetailTimePeriods.map((t) => <option key={t.label} value={t.value}>{t.label}</option>)}
               </select>
           </h2>
-        </div>        
-        <button type="button" className="btn update" onClick={zoomOut}>
-          Zoom Out
-        </button>
-        {!data && <div>Loading</div>}
+         
+        </div>   
+       <div className={styles.zoomButtonDiv}>
+       <button type="button" className={styles.zoomButton} onClick={zoomOut}>
+               Reset Zoom
+          </button>
+       </div>
+     
+
+          {!data && <div>Loading</div>}
         {data && 
           <div className={styles.noSelect}>
           {
+            
             <ResponsiveContainer width="100%" aspect={3.0}>
               <LineChart
                   width={1000}
@@ -402,10 +408,9 @@ export default function LaneDetail(props) {
                   margin={{ top: 30, right: 30, left: 30, bottom: 30 }}
                   onMouseDown={(e) => set_left_area(e.activeLabel)}
                   onMouseMove={(e) => set_right_area(e.activeLabel)} 
-                  onMouseUp={zoom}
-                   >
+                  onMouseUp={zoom} >
                   
-                 <CartesianGrid strokeDasharray="3 3" />
+                 <CartesianGrid strokeDasharray="2 2" />
                 <XAxis 
                    padding={{ left: 10 }}
                   allowDataOverflow = {true}
@@ -417,7 +422,7 @@ export default function LaneDetail(props) {
                   domain={[left, right]}
                   tick={{angle: -35, textAnchor: "end"}}
                   tickFormatter={formatTimeTick}>
-                  <Label value="Time" offset={40} position="bottom"/>
+                  <Label value="Time" offset={15} position="bottom"/>
                 </XAxis>            
                 <YAxis 
                   style={{fontSize: '14px',}}
@@ -448,17 +453,19 @@ export default function LaneDetail(props) {
           }
           </div>
         }
-
+         
         <h2 className={styles.laneDetailHeader2}>
             Moth count history
             <span id={styles.laneDetailHeaderSpace}></span>
-            <select value={historyPeriodValue} onChange={handleHistoryPeriodChange}>
+            <select className={styles.dropdown} value={historyPeriodValue} onChange={handleHistoryPeriodChange}>
               {HistoryTimePeriods.map((t) => <option key={t.label} value={t.value}>{t.label}</option>)}
             </select>
         </h2>
-        <button type="button" className="btn update history" onClick={zoomOutHistory}>
-          Zoom Out
+        <div className={styles.zoomButtonDiv}>
+        <button type="button" className={styles.zoomButton} onClick={zoomOutHistory}>
+          Reset Zoom
         </button>
+        </div>
         {!historyData && <div>Loading</div>}
         {historyData && 
           <div className={styles.noSelect}>
@@ -483,16 +490,17 @@ export default function LaneDetail(props) {
                   domain={[leftHistory, rightHistory]}
                   tick={{angle: -35, textAnchor: "end"}}
                   tickFormatter={formatDayTick}>
-                  <Label value="Time" offset={40} position="bottom"/>
+                  <Label value="Time" offset={10} position="bottom"/>
                 </XAxis>            
                 <YAxis 
                   style={{fontSize: '14px',}}
                   dataKey="moth_delta"
                   label={{ value: 'Moth Count', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}
                   domain={["dataMin", "dataMax+20"]}
-                  >
+                                    >
                     
                 </YAxis>
+                <CartesianGrid strokeDasharray="2 2" />
                 <Tooltip 
                   isAnimationActive={false}
                   content={<CustomHistoryTooltip />}/>
@@ -509,6 +517,7 @@ export default function LaneDetail(props) {
               </LineChart>
           </ResponsiveContainer>
           }
+          
           </div>
         }
 
