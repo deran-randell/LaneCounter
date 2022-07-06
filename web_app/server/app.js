@@ -23,14 +23,7 @@ app.set('view engine', 'jade');
 const whitelist = ["http://localhost:3000", "http://localhost:3001"]
 const corsOptions = {
   origin:true,
-  // origin: function (origin, callback) {
-  //   if (!origin || whitelist.indexOf(origin) !== -1) {
-  //     callback(null, true)
-  //   } else {
-  //     callback(new Error("Not allowed by CORS"))
-  //   }
-  // },
-   credentials: true,
+  credentials: true,
 }
 
 app.use(cors(corsOptions))
@@ -40,6 +33,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 app.use('/', indexRouter);
 app.use('/dashboard', dashboardRouter);
@@ -57,6 +51,10 @@ app.use((err, req, res, next) => {
   
   return;
 })
+
+app.get('/*', function (req, res) {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 process.on('uncaughtException', err => {
   console.error('There was an uncaught error', err)

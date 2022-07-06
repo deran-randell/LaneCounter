@@ -18,9 +18,9 @@ mqtt_client.on('connect', () => {
   }
 
   // for testing only
-  doFakePublish(1, 10000);
-  doFakePublish(2, 10000);
-  doFakePublish(3, 10000);
+  //doFakePublish(1, 10000);
+  //doFakePublish(2, 10000);
+  //doFakePublish(3, 10000);
 })
 
 mqtt_client.on("error", (error) => {

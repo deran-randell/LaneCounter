@@ -5,6 +5,7 @@ const laneOverview = require("../services/laneOverviewData");
 router.get('/:lane_id', function(req, res, next) {
     try {
         //console.log(laneOverview.getLaneOverviewData(req.params.lane_id));
+        //res.header("Access-Control-Allow-Origin", "*");
         res.json(laneOverview.getLaneOverviewData(req.params.lane_id));        
     } 
     catch (error) {

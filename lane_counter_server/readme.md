@@ -35,3 +35,8 @@ TCP server port that the moth counter devices should connect to
 - mosquitto_dynamic_security.dll
 
 > Note: The DLLs must be in the same folder as the lane\_counter\_server.exe file.
+
+## **Test Client**
+ test_moth_client.exe available for testing - pass lane number and device ID as command line parameters e.g.
+ 
+ > 'test_moth_client.exe' 2 1452
