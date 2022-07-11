@@ -157,12 +157,12 @@
     <ClCompile Include="src\MqttManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\include\LaneCounterMsgTypes.h" />
     <ClInclude Include="include\ConfigReader\IniConfigReader.h" />
     <ClInclude Include="include\ConfigReader\IniFieldNames.h" />
     <ClInclude Include="include\Json\JsonFieldNames.h" />
     <ClInclude Include="include\Json\JsonHandler.h" />
     <ClInclude Include="include\Comms\LaneCounterServer.h" />
-    <ClInclude Include="include\LaneCounterMsgTypes.h" />
     <ClInclude Include="include\Mqtt\MqttClient.h" />
     <ClInclude Include="include\MqttManager.h" />
     <ClInclude Include="include\Mqtt\MqttPublisherInterface.h" />

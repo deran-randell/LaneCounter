@@ -141,7 +141,8 @@ function updateDataForLane(lane_id, lane_data) {
                 let add_device = false;
 
                 if (!mothLanes[i].active) { // System was restarted
-                    if ( lane_data.device_id !== mothLanes[i].device) {  // Device has changed
+                    // convert device id to string no padding and compare                    
+                    if ( lane_data.device_id.toString().trim() !== mothLanes[i].device.toString().trim()) {  // Device has changed
                         console.log("Restart: Lane" + lane_id + " device has changed");
                         addLaneDevice(lane_id, lane_data.device_id); // updates mothLanes[i].device
                         addCountForLane(lane_id, lane_data.moth_count, lane_data.moth_count, lane_data.timestamp); // updates total, count, delta, etc
