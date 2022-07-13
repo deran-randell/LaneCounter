@@ -38,6 +38,7 @@ After deployment, from the "server" sub-directory, run the app with the command>
 	- mysql>\. D:/path/to/file/Event_MothCountHistoryEvent.sql
 	
 > The MySQL data backups (for the raw moth data before archives are done each day and month) are located in: "C:\ProgramData\MySQL\MySQL Server 8.0\Uploads\mothdb"
+> For the script to create the mothdb database, see the readme.md file in the project "database" directory
 	
 
 3. **Install Mosquitto**  mosquitto-2.0.14-install-windows-x64.exe
