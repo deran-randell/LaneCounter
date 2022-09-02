@@ -19,15 +19,17 @@ var mothLanes = [
 initialiseMothCounter();
 
 // Read from the database to initialise the current moth total per lane
-// LaneCount table MUST be initialised for all 22 lanes
+// LaneTotal table MUST be initialised for all 22 lanes
 async function initialiseMothCounter() {
     if (!initialised) {
 
         for (let i = 0; i < 3; i++)
         {
+            // Get the current cumulative total number of moths for the lane
             let result = await getLaneTotal(i+1);
             mothLanes[i].total = result.total;
 
+            // Get the current device description for the lane
             let result2 = await getCurrentLaneDevice(i+1);
             if (Boolean(result2.device)) {
                 mothLanes[i].device = result2.device;
@@ -36,6 +38,7 @@ async function initialiseMothCounter() {
                 console.log("Device for lane " + (i+1) + " not found");
             }
 
+            // Get the last data entered in the LaneCount table for the lane
             await getLastLaneData(i+1);
 
             console.log("Lane " + (i+1) + 
@@ -45,21 +48,11 @@ async function initialiseMothCounter() {
                 ", timestamp=" + mothLanes[i].timestamp
             );    
 
+            // Initialise the buffer with the last captured values
             mothLanes[i].add_history();
         } 
             
         initialised = true;
-
-        /*
-        let temp = new CircularBuffer(10);
-        for (let j = 0; j < 20; j++) {
-            temp.enq(j);
-            console.log("temp size = " + temp.size() + " array = " + temp.toarray());
-        }
-        console.log("temp index 0 = " + temp.get(0));
-        console.log("temp index 9 = " + temp.get(9));
-        console.log("temp get 0 to 5 = " + temp.get(0,5));
-        */
     }
 }
 

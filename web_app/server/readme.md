@@ -14,6 +14,10 @@ After deployment, from the "server" sub-directory, run the app with the command>
 
 1. **Install node.js**  node-v16.5.0-x64.msi
 
+	- At command prompt, install "serve":
+	- >npm install -g serve
+
+
 2. **Install MySQL**   mysql-installer-community-8.0.28.0.msi
 
     - Choose "Server only" install option

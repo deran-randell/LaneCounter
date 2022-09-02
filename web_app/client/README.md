@@ -14,7 +14,7 @@ From the client sub-directory>serve -s -C build
 ## **Deployment**
 
 1. From a node.js command prompt> npm install -g serve
-
+2. May require the following: >Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 
 
 

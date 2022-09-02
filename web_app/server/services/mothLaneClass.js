@@ -3,10 +3,10 @@ const CircularBuffer = require("circular-buffer");
 class MothLane {
     constructor(lane_id, timestamp) {
         this._id = lane_id;
-        this._total = 0;
-        this._count = 0;
-        this._delta = 0;
-        this._device = "";
+        this._total = 0; // The cumulative total number of moths for the lane, including device changes and restarts
+        this._count = 0; // The current total count reported by the device for this lane
+        this._delta = 0; // The number of moths counted since the last update was received
+        this._device = ""; // The current device identifier for the lane
         this._millis = 0;
         this._timestamp = timestamp; // a number in milliseconds
         this._active = false;
