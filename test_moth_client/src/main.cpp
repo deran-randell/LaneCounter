@@ -85,8 +85,10 @@ int main(int argc, char** argv)
 	info.moth_count = 0;
 	info.timestamp = 0;
 
-
-	//std::cin.get();
+	for (int i = 0; i < MAX_SENSORS; i++)
+	{
+		info.sensor_states[i] = lane_counter_messages::none;
+	}
 
 	while (1)
 	{

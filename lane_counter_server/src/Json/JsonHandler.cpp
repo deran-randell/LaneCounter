@@ -1,6 +1,7 @@
 #include "Json/JsonHandler.h"
 #include "Json/JsonFieldNames.h"
 #include <boost/json.hpp>
+#include <chrono>
 
 std::string JsonHandler::writeJson(const lane_counter_messages::CounterInfo& info)
 {
@@ -16,10 +17,15 @@ std::string JsonHandler::writeJson(const lane_counter_messages::CounterInfo& inf
 
 	/*Using Boost lib for json */
 	boost::json::object json_object;
+	boost::json::array sensor_state(MAX_SENSORS);
+
+	std::copy(info.sensor_states, info.sensor_states + MAX_SENSORS, sensor_state.begin());
+	boost::json::value sensor_state_(std::move(sensor_state));
 
 	json_object[json_field_names::DEVICE_ID] = info.device_id;
 	json_object[json_field_names::MOTH_COUNT] = info.moth_count;
 	json_object[json_field_names::TIMESTAMP] = info.timestamp;
+	json_object[json_field_names::SENSOR_STATES] = sensor_state_;
 
 
 	std::string json_string = boost::json::serialize(json_object);
