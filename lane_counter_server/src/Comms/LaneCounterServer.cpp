@@ -6,9 +6,9 @@ LaneCounterServer::LaneCounterServer(boost::asio::io_context& context, uint16_t 
 	, tcp_handler_{nullptr}
 {}
 
-void LaneCounterServer::setTcpHandler(TcpMsgHandlerInterface& tcp_handler)
+void LaneCounterServer::setTcpHandler(TcpMsgHandlerInterface* tcp_handler)
 {
-	tcp_handler_ = &tcp_handler;
+	tcp_handler_ = tcp_handler;
 }
 
 LaneCounterServer::~LaneCounterServer()

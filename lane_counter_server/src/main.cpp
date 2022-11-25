@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 	MqttClient mqtt_client(reader.getMqttAddress());
 	MqttManager manager(mqtt_client);
 
-	server.setTcpHandler(manager);
+	server.setTcpHandler(&manager);
 	context_manager.start();
 
 	mqtt_client.subscribe(nullptr, "#"); // remove in production

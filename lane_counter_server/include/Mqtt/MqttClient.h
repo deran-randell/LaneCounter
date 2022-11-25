@@ -28,7 +28,7 @@ public:
 	virtual void on_disconnect(int rc) override;
 	
 	// Inherited via IMqttPublisher
-	virtual void publish_topic(const std::string& topic, int payload_len, const void* payload) override;
+	virtual void publish_topic(const std::string topic, int payload_len, const void* payload) override;
 
 
 

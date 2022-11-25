@@ -16,7 +16,7 @@ class LaneCounterServer : public cybicomms::TcpClientHandler
 public:
 	LaneCounterServer(boost::asio::io_context& context, uint16_t port);
 
-	void setTcpHandler(TcpMsgHandlerInterface& tcp_handler);
+	void setTcpHandler(TcpMsgHandlerInterface* tcp_handler);
 
 	~LaneCounterServer();
 

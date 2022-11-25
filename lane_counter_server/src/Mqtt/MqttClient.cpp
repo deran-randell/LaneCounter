@@ -9,8 +9,8 @@ MqttClient::MqttClient(const std::string& broker_ip_address, uint16_t port)
 	std::cout <<"Mosquitto Lib Version: " << major << "." << minor << "." << rev << std::endl;
 	
 	mosqpp::lib_init();
-	this->threaded_set();
-	this->connect_async(broker_ip_address.c_str(), port, 1000);
+	this->threaded_set(true);
+	this->connect(broker_ip_address.c_str(), port, 1000);
 }
 
 MqttClient::~MqttClient()
@@ -35,9 +35,9 @@ void MqttClient::on_subscribe(int mid, int qos_count, const int* granted_qos)
 }
 
 // Inherited via IMqttPublisher
-void MqttClient::publish_topic(const std::string& topic, int payload_len, const void* payload)
+void MqttClient::publish_topic(const std::string topic, int payload_len, const void* payload)
 {
-	this->publish(nullptr, topic.c_str(), payload_len, payload);
+	this->publish(nullptr, topic.c_str(), payload_len, payload,2);
 }
 
 void MqttClient::on_disconnect(int rc)
@@ -47,10 +47,11 @@ void MqttClient::on_disconnect(int rc)
 
 void MqttClient::run()
 {
-	//rc = loop();
-	//if (rc)
-	//{
-	//	reconnect_async();
-	//}
-	this->loop_forever();
+	rc = loop();
+	if (rc)
+	{
+		//reconnect_async();
+		reconnect();
+	}
+	//this->loop_forever();
 }
