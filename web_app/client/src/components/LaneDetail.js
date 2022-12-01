@@ -16,7 +16,9 @@ export default function LaneDetail(props)
     { label: "Last 6 hours", value: 2, minutes: 6 * 60, update_rate: 60, aggregation: "per 30 seconds", },
     { label: "Last 3 hours", value: 3, minutes: 3 * 60, update_rate: 60, aggregation: "per 10 seconds", },
     { label: "Last 1 hour", value: 4, minutes: 60, update_rate: 60, aggregation: "per 4 seconds", },
-    { label: "Last 30 minutes", value: 5, minutes: 30, update_rate: 10, aggregation: "per 2 seconds", }, { label: "Last 10 minutes", value: 6, minutes: 10, update_rate: 10, aggregation: "per second", }, { label: "Last 1 minute", value: 7, minutes: 1, update_rate: 1, aggregation: "per second", } ];
+    { label: "Last 30 minutes", value: 5, minutes: 30, update_rate: 10, aggregation: "per 2 seconds", },
+    { label: "Last 10 minutes", value: 6, minutes: 10, update_rate: 10, aggregation: "per second", },
+    { label: "Last 1 minute", value: 7, minutes: 1, update_rate: 1, aggregation: "per second", } ];
 
   const HistoryTimePeriods = [
     { label: "Last 1 month", value: 0, months: 1 },
