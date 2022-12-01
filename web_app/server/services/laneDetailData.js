@@ -94,10 +94,14 @@ async function getLaneData(laneId, minutes) {
   }
 }
 
-async function addLaneData(laneId, count, delta, millis, time_stamp) {
+async function addLaneData(laneId, count, delta, millis, time_stamp, sensor_states,) {
+  if (!sensor_states)
+  {
+    sensor_states = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  }
   try {
-    const result = await db.query("INSERT INTO lanecount (lane_id, moth_count, moth_delta, millis, time_stamp) VALUES (?, ?, ?, ?, FROM_UNIXTIME(?))",
-    [laneId, count, delta, millis, time_stamp]);
+    const result = await db.query("INSERT INTO lanecount (lane_id, moth_count, moth_delta, millis, time_stamp, sensor_states) VALUES (?, ?, ?, ?, FROM_UNIXTIME(?), ?)",
+    [laneId, count, delta, millis, time_stamp, sensor_states]);
 
     if (result.affectedRows == 0) {
       throw new Error("Error inserting moth count for lane " + laneId);

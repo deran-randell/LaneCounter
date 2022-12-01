@@ -1,20 +1,23 @@
 const CircularBuffer = require("circular-buffer");
 
-class MothLane {
-    constructor(lane_id, timestamp) {
+class MothLane
+{
+    constructor(lane_id, timestamp)
+    {
         this._id = lane_id;
         this._total = 0; // The cumulative total number of moths for the lane, including device changes and restarts
         this._count = 0; // The current total count reported by the device for this lane
         this._delta = 0; // The number of moths counted since the last update was received
         this._device = ""; // The current device identifier for the lane
         this._millis = 0;
+        this._sensor_states = "";
         this._timestamp = timestamp; // a number in milliseconds
         this._active = false;
 
         // Format the array objects in the same way as the getLaneData MySQL query result: {unix_timestamp, moth_delta}
         // Keep most recent 80 seconds of data per lane
         this._history = new CircularBuffer(80);
-        
+
         // CircularBuffer: 
         // .get(0) = newest
         // .get(.size) = oldest
@@ -22,19 +25,22 @@ class MothLane {
         // .get(0,2) [0,1,2] inclusive
     }
 
-    is_receiving_data() {
+    is_receiving_data()
+    {
         // TODO: tolerance?
         let now = new Date();
         return ((now.getTime() - this._timestamp) < 3000);
     }
 
-    add_history() { // Take the current values and write them to the history array        
-        this._history.enq({"unix_timestamp": Math.round(this._timestamp/1000), "moth_delta": this._delta });
+    add_history()
+    { // Take the current values and write them to the history array        
+        this._history.enq({ "unix_timestamp": Math.round(this._timestamp / 1000), "moth_delta": this._delta });
     }
 
     // Did the device reset? Did the millis or count rollover?
-    did_reset(new_millis, previous_timestamp, new_count) {
-        let result = {"reset": false, "millis_rollover": false, "count_rollover": false, "ignore_count": false};
+    did_reset(new_millis, previous_timestamp, new_count)
+    {
+        let result = { "reset": false, "millis_rollover": false, "count_rollover": false, "ignore_count": false };
 
         let diff_millis = new_millis - this._millis;
         //console.log("diff_millis = " + diff_millis);
@@ -44,40 +50,49 @@ class MothLane {
         {
             // Use 49 days as the rollover check.
             // If the system has been down without logging for this long we have bigger data issues anyway!
-            if (Math.abs(diff_millis) >= 4233600000) {
+            if (Math.abs(diff_millis) >= 4233600000)
+            {
                 console.log("Lane " + this._id + " millis rollover detected");
                 result.millis_rollover = true;
             }
-            else {
+            else
+            {
                 console.log("Lane " + this._id + " reset detected - millis decreased");
                 result.reset = true;
             }
         }
         // No rollover. Was there a reset?
-        else {
+        else
+        {
             let diff_time_ms = this._timestamp - previous_timestamp;
             //console.log("diff_time_ms = " + diff_time_ms);
             let diff_data = Math.abs(diff_time_ms - diff_millis);
             //console.log("diff_data = " + diff_data);
 
             // TODO: Need to decide on a tolerance value. 2 seconds?
-            if (diff_data > 2000) {
+            if (diff_data > 2000)
+            {
                 console.log("Lane " + this._id + " reset detected - time and millis difference more than 2 seconds");
                 result.reset = true;
             }
         }
 
-        if (result.reset) {
+        if (result.reset)
+        {
             result.count_rollover = true;
         }
-        else {
+        else
+        {
             let count_diff = new_count - this._count;
-            if (count_diff < 0) { // This could just be a glitch? 
+            if (count_diff < 0)
+            { // This could just be a glitch? 
                 // Look for an integer rollover
-                if (count_diff < -4000000000) {
+                if (count_diff < -4000000000)
+                {
                     result.count_rollover = true;
                 }
-                else {
+                else
+                {
                     // pretend like it didn't happen
                     result.ignore_count = true;
                 }
@@ -85,79 +100,107 @@ class MothLane {
         }
 
         return result;
-    } 
+    }
 
     // Getters and Setters
 
-    get id() {
+    get id()
+    {
         return this._id;
     }
 
-    set id(lane_id) {
+    set id(lane_id)
+    {
         this._id = lane_id;
     }
 
-    get total() {
+    get total()
+    {
         return this._total;
     }
 
-    set total(lane_total) {
+    set total(lane_total)
+    {
         this._total = lane_total;
     }
-    
-    get count() {
+
+    get count()
+    {
         return this._count;
     }
 
-    set count(lane_count) {
+    set count(lane_count)
+    {
         this._count = lane_count;
     }
 
-    get delta() {
+    get delta()
+    {
         return this._delta;
     }
 
-    set delta(lane_delta) {
+    set delta(lane_delta)
+    {
         this._delta = lane_delta;
     }
 
-    get device() {
+    get device()
+    {
         return this._device;
     }
 
-    set device(lane_device) {
+    set device(lane_device)
+    {
         this._device = lane_device;
     }
-    
-    get millis() {
+
+    get millis()
+    {
         return this._millis;
     }
 
-    set millis(lane_millis) {
+    set millis(lane_millis)
+    {
         this._millis = lane_millis;
     }
 
-    get timestamp() {
+    get timestamp()
+    {
         return this._timestamp;
     }
 
-    set timestamp(lane_timestamp) {
+    set timestamp(lane_timestamp)
+    {
         this._timestamp = lane_timestamp;
     }
+    get sensor_states()
+    {
+        return this._sensor_states;
+    }
 
-    get active() {
+    set sensor_states(sensor_states)
+    {
+        this._sensor_states = sensor_states;
+    }
+
+
+    get active()
+    {
         return this._active;
     }
 
-    set active(lane_active) {
+    set active(lane_active)
+    {
         this._active = lane_active;
     }
 
-    get history() {
+    get history()
+    {
         return this._history;
     }
 
-    set history(lane_history) {
+    set history(lane_history)
+    {
         this._history = lane_history;
     }
 }

@@ -13,6 +13,7 @@ const laneDetailHistoryRouter = require('./routes/laneHistory');
 const dashboardRouter = require('./routes/dashboard');
 const laneOverviewRouter = require('./routes/laneOverview');
 const laneDeviceRouter = require('./routes/laneDevice');
+const sensorStatesRouter = require('./routes/sensorStates');
 
 const mqttClient = require('./services/mqttClient');
 
@@ -20,9 +21,9 @@ var app = express();
 
 app.set('view engine', 'jade');
 
-const whitelist = ["http://localhost:3000", "http://localhost:3001"]
+const whitelist = [ "http://localhost:3000", "http://localhost:3001" ]
 const corsOptions = {
-  origin:true,
+  origin: true,
   credentials: true,
 }
 
@@ -43,20 +44,24 @@ app.use('/laneDetailUpdate', laneDetailUpdateRouter);
 app.use('/laneDetailHistory', laneDetailHistoryRouter);
 app.use('/laneOverview', laneOverviewRouter);
 app.use('/laneDevice', laneDeviceRouter);
+app.use('/sensorStates', sensorStatesRouter);
 
-app.use((err, req, res, next) => {
+app.use((err, req, res, next) =>
+{
   const statusCode = err.statusCode || 500;
   console.error(err.message, err.stack);
-  res.status(statusCode).json({'message': err.message});
-  
+  res.status(statusCode).json({ 'message': err.message });
+
   return;
 })
 
-app.get('/*', function (req, res) {
+app.get('/*', function (req, res)
+{
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-process.on('uncaughtException', err => {
+process.on('uncaughtException', err =>
+{
   console.error('There was an uncaught error', err)
   process.exit(1) //mandatory (as per the Node.js docs)
 })

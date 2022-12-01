@@ -5,22 +5,23 @@ import style from './NavItem.module.css';
 
 const resolveLinkPath = (childTo, parentTo) => `${parentTo}/${childTo}`;
 
-const NavItemHeader = props => {
-
+const NavItemHeader = props =>
+{
   const { item } = props;
 
   const { title, Icon, path: headerToPath, children } = item;
   const location = useLocation();
 
-  const [expanded, setExpand] = useState(
+  const [ expanded, setExpand ] = useState(
     location.pathname.includes(headerToPath)
   );
 
-  const onExpandChange = e => {
+  const onExpandChange = e =>
+  {
     e.preventDefault();
     setExpand(expanded => !expanded);
   };
-	
+
   return (
     <>
       <button
@@ -30,20 +31,21 @@ const NavItemHeader = props => {
         <Icon className={style.navIcon} />
         <span className={style.navLabel}>{title}</span>
         <ChevronDownIcon
-          className={`${style.navItemHeaderChevron} ${
-            expanded && style.chevronExpanded
-          }`}
+          className={`${style.navItemHeaderChevron} ${expanded && style.chevronExpanded
+            }`}
         />
       </button>
 
       {expanded && (
         <div className={style.navChildrenBlock}>
-          {children.map((item, index) => {
+          {children.map((item, index) =>
+          {
             const key = `${item.title}-${index}`;
 
             const { title, Icon, children } = item;
 
-            if (children) {
+            if (children)
+            {
               return (
                 <div key={key}>
                   <NavItemHeader

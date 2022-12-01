@@ -1,4 +1,3 @@
-
 .laneDetailHeader1 {
     margin:0;
     padding:0;
@@ -79,6 +78,7 @@
   white-space: nowrap;
   word-wrap: break-word;
 }
+
 
 .zoomButton:hover {
   background-color: #759ef0;

@@ -1,10 +1,5 @@
-import {
-    CogIcon,
-    ChartBarIcon,
-    ViewGridIcon,
-    PresentationChartLineIcon
-  } from '@heroicons/react/outline';
-  
+import { CogIcon, ChartBarIcon, ViewGridIcon, PresentationChartLineIcon } from '@heroicons/react/outline';
+
 export const SideBarData = [
     {
         title: 'Dashboard',
@@ -37,5 +32,5 @@ export const SideBarData = [
         title: 'Configuration',
         path: '/config',
         Icon: CogIcon
-    } 
+    }
 ]

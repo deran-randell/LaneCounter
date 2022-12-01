@@ -3,11 +3,12 @@ import { NavLink } from 'react-router-dom';
 import style from './NavItem.module.css';
 import NavItemHeader from './NavItemHeader.js';
 
-const NavItem = props => {
-
+const NavItem = props =>
+{
   const { title, path, Icon, children } = props.item;
 
-  if (children) {
+  if (children)
+  {
     return <NavItemHeader item={props.item} />;
   }
 
