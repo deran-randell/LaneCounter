@@ -83,15 +83,12 @@ enum class SPIState : uint16_t
   EMITTERS_OFF  = 0x6666,
   EMITTERS_ON   = 0x7777
 };
-
 SPIState the_spi_state;
 */
-
 
 // The Arduino pin used for the various SPI slave select / chip select pins
 static const uint8_t DAC_SS_PIN = 49;
 //static const uint8_t HPPR_SS_PIN          = 10;       //Interboard1
-
 static const uint8_t TLC5917_LE_PIN = 6;
 static const uint8_t TLC5917_OE_PIN = 7;
 static const uint8_t TLC5917_SDI = 51;
@@ -127,8 +124,6 @@ uint32_t minTriggerTime = 2; //don't count successive triggers that happen withi
 uint8_t suspiciousTriggers[sensorsPerAxis]; //add
 boolean adjacencyFilter = HIGH; //filter out concurrent triggers of adjacent sensors?
 
-
-
 uint16_t trigCount = 0;  // Trigger count
 
 //static const uint16_t TIME_BETWEEN_SPI_TXRX = 100;    // ms
@@ -147,19 +142,12 @@ bool debugPrint = false; //print which sensor triggered
 uint16_t globalTrigRefDefault = 400;
 uint16_t triggerRef[sensorsPerAxis];
 
-
-
 long randNumber;
-
-
-
 const int TCP232_RST_PIN = 8;
 bool TCP232_RST_STATE = HIGH;
 
 lane_counter_messages::Header header = {};
 lane_counter_messages::CounterInfo counter = {};
-
-
 
 //Calibration Data Struct. Intending to save calibration data to eeprom
 struct CalibrationTable
@@ -197,32 +185,29 @@ void initialiseSensorStateArrays() {
 
 
 
-boolean cleaningHatchClosed() {
+boolean cleaningHatchOpenedClosed() {  
   //DERAN - this is a placeholder, in future we will return false if the GPIO of the cleaning hatch microswitch is tripped
   return true;
-  
 }
 
 /*
  Functions for reading and writing persisten calibration data in EEPROM
  */
 
-/*
- * DERAN: this function could return the index of the sensor that triggered a recalibration. 
- * You will have to return something else, such as "-1" and handle that when checkSuspiciousTriggers() is called
- */
-boolean checkSuspiciousTriggers() {
-  
+int checkSuspiciousTriggers() {
   for (int pin = 0; pin < sensorsPerAxis; pin++) {
+  
     if(suspiciousTriggers[pin] >= RAMtable.suspicionThresh) {
+
       Serial.print("sensor ");
       Serial.print(pin);
+
       Serial.println(" triggered recalibration");
-      return true;
-      
+
+      return pin;
     }
   }
-  return false;
+  return -1;
 }
 
 boolean calibrationValid() {
@@ -380,7 +365,6 @@ void setAllRefs(uint16_t dacVal)  //set all reference voltages the same: 10 bit 
   updateDACs(false);
 }
 
-
 /*
     FUNCTIONS TO CONTRL TLC5917 - SHOULD PROBABLY PUT IN ANOTHER FILE OR MAKE INTO A CLASS
 */
@@ -487,7 +471,6 @@ void autoCalibrate() {
     }
   //possibly send/set a bit to be sent via ethernet
   
-  
 }
 
 //facility to return an error code, 0 means good calibration
@@ -566,13 +549,15 @@ void setupEthernet() {
   header.type = lane_counter_messages::counter_info;
   header.message_size = sizeof(lane_counter_messages::CounterInfo);
 
-
-  //counter.lane_number = 1U;
+  // counter.lane_number = 1U;
   counter.lane_number = RAMtable.lane;
   counter.device_id = RAMtable.ser;
   counter.moth_count = 0;
   counter.timestamp = millis();
-  
+   for (int i = 0; i < MAX_SENSORS; i++)
+	{
+		counter.sensor_states[i] = lane_counter_messages::none;
+	}
 
   pinMode(TCP232_RST_PIN, OUTPUT);
   digitalWrite(TCP232_RST_PIN,TCP232_RST_STATE);
@@ -581,7 +566,6 @@ void setupEthernet() {
 
 void sendEthernet() {
   //counter.moth_count += random(101);
-  //counter.timestamp = millis();
   counter.timestamp = millis();
   
   Serial2.write((uint8_t*)&header, sizeof(lane_counter_messages::Header));
@@ -672,7 +656,7 @@ void loop() {
   if (Serial.available()) {
     // read the incoming byte:
     char c = Serial.read();
-
+    
     switch (c) {
       case 't':  // Toggle serial printing on and off
         {
@@ -820,7 +804,7 @@ void loop() {
   /*DERAN: The whole counting loop below should only be run if the cleaning hatch is closed
   
    * if(cleaningHatchClosed()) {
-   *   if the in the previous loop the hatch was open {
+   *   if in the previous loop the hatch was open {
    *      report that cleaning has completed
    *      clear the cleaning bits of the message struct
    *      }
@@ -905,12 +889,20 @@ void loop() {
     }
   SendData();
 
-   //DERAN if you change checkSuspiciousTriggers() to return an int representing the sensor that trigger a calibration then this conditional check will have to change
-   // for example it could be if(checkSuspiciousTriggers != -1)
-  if(checkSuspiciousTriggers()) {
+  int pin = checkSuspiciousTriggers(); // return an int representing the sensor that triggered the calibration    
+  if(pin != -1) {
+    delay(1000);
+    counter.sensor_states[pin] = lane_counter_messages::calibration_started;
+    SendData();
+    delay(1000);
+
     Serial.println("Recalibration required");
     autoCalibrate();
     
+    counter.sensor_states[pin] = lane_counter_messages::calibration_completed;
+    Serial.println("Recalibration complete");
+    SendData();
+    setAllSensorStatus(lane_counter_messages::none);
   }
     
 }
@@ -983,10 +975,22 @@ void printCalibState() {
 
 }
 
+void setAllSensorStatus(lane_counter_messages::sensor_state status)
+{
+  for (int i = 0; i < MAX_SENSORS; i++)
+  {
+    counter.sensor_states[i] = status;
+  }
+}
+
 void CalibrationLoop() {
+  setAllSensorStatus(lane_counter_messages::calibration_started);
+
+  SendData();
   bool calibrating = true;
-  
+ 
   while (calibrating) {
+    
     //check for input
     if (Serial.available()) {
       // read the incoming byte:
@@ -995,6 +999,10 @@ void CalibrationLoop() {
       switch (c) {
         case 'x':
           {
+            setAllSensorStatus(lane_counter_messages::calibration_completed);
+            SendData();
+            setAllSensorStatus(lane_counter_messages::none);
+
             Serial.println("Exiting calibration mode.");
             calibrating = false;
             break;
