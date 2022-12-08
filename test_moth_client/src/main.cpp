@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 	
 	if (argc < 2)
 	{
-		info.lane_number = 1;
+		info.lane_number = 2;
 		info.device_id = 5678;
 	}
 	else
@@ -89,6 +89,7 @@ int main(int argc, char** argv)
 	{
 		info.sensor_states[i] = lane_counter_messages::none;
 	}
+	info.sensor_states[5] = lane_counter_messages::cleaning_started;
 
 	while (1)
 	{
