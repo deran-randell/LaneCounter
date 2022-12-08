@@ -24,30 +24,30 @@ async function getLaneDataWithPagination(laneId, page = 1) {
 async function getLaneData(laneId, minutes) {
   try {
     let sql_string = "";
-    let aggregate_seconds = 60;
+    let aggregate_seconds = 0;
 
     switch (minutes) {
       case "0":
-        // aggregate_seconds = 60;
+        aggregate_seconds = 60;
         break;
       case "1":
         break;
       case "10":
         break;
       case "30":
-        // aggregate_seconds = 2;
+        aggregate_seconds = 2;
         break;
       case "60":
-        // aggregate_seconds = 4;
+        aggregate_seconds = 4;
         break;
       case "180":
-        // aggregate_seconds = 10;
+        aggregate_seconds = 10;
         break;
       case "360":
-        // aggregate_seconds = 30;
+        aggregate_seconds = 30;
         break;
       case "720":
-        // aggregate_seconds = 30;
+        aggregate_seconds = 30;
         break;
     }
 
